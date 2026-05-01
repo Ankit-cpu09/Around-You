@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Around You - A premium platform connecting employers with daily wage workers in real-time. Post jobs, find work, and get paid instantly.">
+  <title>Around You - Find Daily Work Near You</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/landing.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar" id="main-navbar">
+    <div class="container">
+      <div class="navbar-brand">
+        <span class="brand-icon">⚡</span> Around You
+      </div>
+      <div class="navbar-nav">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#how-it-works" class="nav-link">How It Works</a>
+        <a href="#tech" class="nav-link">Tech Stack</a>
+        <a href="#" class="btn btn-primary btn-sm" onclick="openAuthModal('login')">Get Started</a>
+      </div>
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="#features" onclick="toggleMobileMenu()">Features</a>
+    <a href="#how-it-works" onclick="toggleMobileMenu()">How It Works</a>
+    <a href="#tech" onclick="toggleMobileMenu()">Tech Stack</a>
+    <a href="#" class="btn btn-primary" onclick="openAuthModal('login'); toggleMobileMenu();">Get Started</a>
+  </div>
+
+  <!-- ========== HERO ========== -->
+  <section class="hero" id="hero">
+    <div class="hero-glow"></div>
+    <div class="container hero-container">
+      <div class="hero-content">
+        <div class="hero-badge">🚀 Real-Time Job Platform</div>
+        <h1 class="hero-title">
+          Find Daily Work<br>
+          <span class="gradient-text">Around You</span>
+        </h1>
+        <p class="hero-subtitle">
+          A premium platform connecting employers with skilled daily wage workers. Post jobs, accept work, navigate to sites, and get paid — all in real-time.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" onclick="openAuthModal('register')">
+            Create Free Account
+          </button>
+          <button class="btn btn-outline btn-lg" onclick="openAuthModal('login')">
+            Log In →
+          </button>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-number">Real-Time</span>
+            <span class="stat-label">Job Alerts</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">Instant</span>
+            <span class="stat-label">Payments</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">GPS</span>
+            <span class="stat-label">Navigation</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card-stack">
+          <div class="floating-card fc-1">
+            <div class="fc-icon" style="background: rgba(139,92,246,0.15); color: #A78BFA;">👷</div>
+            <div><div class="fc-title">New Job Available</div><div class="fc-sub">Construction Helper — ₹800/day</div></div>
+          </div>
+          <div class="floating-card fc-2">
+            <div class="fc-icon" style="background: rgba(16,185,129,0.15); color: #10b981;">✓</div>
+            <div><div class="fc-title">Payment Received</div><div class="fc-sub">₹1,200 credited to your account</div></div>
+          </div>
+          <div class="floating-card fc-3">
+            <div class="fc-icon" style="background: rgba(6,182,212,0.15); color: #06b6d4;">📍</div>
+            <div><div class="fc-title">Navigate to Site</div><div class="fc-sub">2.4 km away • 8 min drive</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll-indicator">
+      <span>Scroll to explore</span>
+      <div class="scroll-arrow">↓</div>
+    </div>
+  </section>
+
+  <!-- ========== FEATURES ========== -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Features</span>
+        <h2 class="section-title">Everything You Need</h2>
+        <p class="section-subtitle">A complete ecosystem for employers and workers to connect, collaborate, and transact seamlessly.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Real-Time Job Posting</h3>
+          <p>Employers post jobs and every online worker gets an instant pop-up notification via WebSocket — no refresh needed.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>Secure Authentication</h3>
+          <p>Industry-standard JWT tokens and bcrypt password hashing keep your account and data fully protected.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💳</div>
+          <h3>Integrated Payments</h3>
+          <p>Complete checkout flow supporting Card, UPI, Net Banking, and Cash — with real-time payment notifications to workers.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🗺️</div>
+          <h3>GPS Navigation</h3>
+          <p>Google Maps integration shows workers the distance, route, and estimated travel time to any job site.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👥</div>
+          <h3>Role-Based Dashboards</h3>
+          <p>Dedicated dashboards for employers and workers with tailored workflows, job management, and history tracking.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Premium UI/UX</h3>
+          <p>Dark glassmorphism theme with aurora glow effects, animated particles, and micro-interactions for a stunning experience.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== HOW IT WORKS ========== -->
+  <section class="section section-alt" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Process</span>
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">From registration to payment — a seamless workflow in four simple steps.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">01</div>
+          <h3>Sign Up</h3>
+          <p>Register as an Employer or Worker. Your GPS location is captured automatically for nearby job matching.</p>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-card">
+          <div class="step-number">02</div>
+          <h3>Post or Find Jobs</h3>
+          <p>Employers post jobs with details and budget. Workers receive instant real-time notifications on their dashboard.</p>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-card">
+          <div class="step-number">03</div>
+          <h3>Accept & Navigate</h3>
+          <p>Workers accept a job with one click and use integrated Google Maps to navigate directly to the job site.</p>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-card">
+          <div class="step-number">04</div>
+          <h3>Get Paid</h3>
+          <p>After job completion, employers pay through the secure checkout. Workers get an instant payment confirmation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TECH STACK ========== -->
+  <section class="section" id="tech">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Technology</span>
+        <h2 class="section-title">Built With Modern Tech</h2>
+        <p class="section-subtitle">A robust, production-grade stack powering every layer of the platform.</p>
+      </div>
+      <div class="tech-grid">
+        <div class="tech-card"><div class="tech-logo">🟢</div><span>Node.js</span></div>
+        <div class="tech-card"><div class="tech-logo">⚙️</div><span>Express.js</span></div>
+        <div class="tech-card"><div class="tech-logo">🐬</div><span>MySQL</span></div>
+        <div class="tech-card"><div class="tech-logo">🔌</div><span>Socket.io</span></div>
+        <div class="tech-card"><div class="tech-logo">🔐</div><span>JWT Auth</span></div>
+        <div class="tech-card"><div class="tech-logo">🗺️</div><span>Google Maps</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== CTA ========== -->
+  <section class="section cta-section">
+    <div class="container">
+      <div class="cta-card">
+        <h2>Ready to Get Started?</h2>
+        <p>Join Around You today and connect with opportunities around you.</p>
+        <div class="hero-actions" style="justify-content: center;">
+          <button class="btn btn-primary btn-lg" onclick="openAuthModal('register')">Create Free Account</button>
+          <button class="btn btn-outline btn-lg" onclick="openAuthModal('login')">Log In →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3><span class="brand-icon">⚡</span> Around You</h3>
+          <p>Connecting employers with skilled daily wage workers through real-time technology.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Platform</h4>
+          <a href="#features">Features</a>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#tech">Tech Stack</a>
+        </div>
+        <div class="footer-links">
+          <h4>Technology</h4>
+          <a href="#">Node.js & Express</a>
+          <a href="#">MySQL Database</a>
+          <a href="#">Socket.io Real-Time</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Around You. Built with ❤️ using modern web technologies.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========== AUTH MODAL ========== -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="auth-modal-title">Welcome Back</h3>
+        <button class="close-btn" onclick="closeAuthModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Login Form -->
+        <div id="login-form">
+          <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" id="login-phone" required placeholder="Enter your 10 digit number">
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="login-password" required placeholder="Enter your password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Log In</button>
+            <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted);">
+              Don't have an account? <a href="#" onclick="switchAuthTab('register')">Sign up here</a>
+            </p>
+          </form>
+        </div>
+        <!-- Register Form -->
+        <div id="register-form" style="display: none;">
+          <form onsubmit="handleRegister(event)">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="reg-name" required placeholder="Enter your name">
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" id="reg-phone" required placeholder="10 digit phone number">
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="reg-password" required placeholder="Create a password">
+            </div>
+            <div class="form-group">
+              <label>I am a...</label>
+              <select id="reg-role" required onchange="toggleSkills()">
+                <option value="employer">Employer (I want to hire workers)</option>
+                <option value="worker">Worker (I'm looking for work)</option>
+              </select>
+            </div>
+            <div class="form-group" id="skills-group" style="display: none;">
+              <label>Skills (comma separated)</label>
+              <input type="text" id="reg-skills" placeholder="e.g. Mason, Electrician, Plumber">
+            </div>
+            <button type="submit" class="btn btn-success btn-block">Create Account</button>
+            <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted);">
+              Already have an account? <a href="#" onclick="switchAuthTab('login')">Log in</a>
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/particles.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Auth modal controls
+    function openAuthModal(tab) {
+      document.getElementById('auth-modal').classList.add('active');
+      switchAuthTab(tab);
+    }
+    function closeAuthModal() {
+      document.getElementById('auth-modal').classList.remove('active');
+    }
+    function switchAuthTab(tab) {
+      if (tab === 'register') {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('register-form').style.display = 'block';
+        document.getElementById('auth-modal-title').textContent = 'Create Account';
+      } else {
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('register-form').style.display = 'none';
+        document.getElementById('auth-modal-title').textContent = 'Welcome Back';
+      }
+    }
+    // Keep old toggleAuth working
+    function toggleAuth(t) { switchAuthTab(t); }
+
+    // Mobile menu
+    function toggleMobileMenu() {
+      document.getElementById('mobile-menu').classList.toggle('open');
+      document.querySelector('.mobile-menu-btn').classList.toggle('active');
+    }
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('main-navbar');
+      nav.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // Intersection observer for scroll animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.feature-card, .step-card, .tech-card').forEach(el => observer.observe(el));
+    });
+  </script>
+</body>
+</html>

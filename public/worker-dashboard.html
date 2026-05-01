@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worker Dashboard - Around You</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <nav class="navbar" style="background: rgba(0,0,0,0.6); border-bottom-color: var(--border-glass); box-shadow: 0 4px 30px rgba(0,0,0,0.3);">
+    <div class="container">
+      <div class="navbar-brand">
+        <span style="font-size:1.1rem;">⚡</span> Around You <span class="role-chip">Worker</span>
+      </div>
+      <div class="navbar-nav">
+        <span id="user-name-display" style="font-weight: 500;"></span>
+        <span id="status-indicator" class="online-badge">ONLINE</span>
+        <button class="btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-grid container">
+    <aside class="sidebar">
+      <ul class="sidebar-nav">
+        <li><a href="#" class="active" id="nav-available-jobs" onclick="switchTab('available-jobs')"><span class="nav-icon">🔍</span> Available Jobs</a></li>
+        <li><a href="#" id="nav-my-jobs" onclick="switchTab('my-jobs')"><span class="nav-icon">📋</span> My Jobs</a></li>
+        <li><a href="#" id="nav-profile" onclick="switchTab('profile')"><span class="nav-icon">👤</span> My Profile</a></li>
+      </ul>
+    </aside>
+
+    <main class="main-content">
+      
+      <!-- AVAILABLE JOBS TAB -->
+      <div id="tab-available-jobs" class="tab-section active">
+        <div class="welcome-banner">
+          <h2>👋 Welcome back!</h2>
+          <p>Browse open jobs posted by employers in your area. New jobs will pop up in real-time.</p>
+          <div class="welcome-time" id="welcome-time"></div>
+        </div>
+
+        <div class="stats-row" id="worker-stats">
+          <div class="stat-card">
+            <div class="stat-icon">📍</div>
+            <div class="stat-value" id="stat-available">0</div>
+            <div class="stat-label">Available Jobs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-value" id="stat-accepted">0</div>
+            <div class="stat-label">Accepted</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🏆</div>
+            <div class="stat-value" id="stat-completed">0</div>
+            <div class="stat-label">Completed</div>
+          </div>
+        </div>
+
+        <div class="dash-section-header">
+          <div>
+            <h2>🔍 Jobs Near You</h2>
+            <p class="section-desc">Click on any job to view details and accept it.</p>
+          </div>
+        </div>
+        <div id="jobs-container" class="job-list">
+          <div class="empty-state">
+            <div class="empty-icon">🔎</div>
+            <h3>No jobs available right now</h3>
+            <p>New jobs will appear here in real-time as employers post them. Stay online to receive instant notifications!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- MY JOBS TAB -->
+      <div id="tab-my-jobs" class="tab-section">
+        <div class="dash-section-header">
+          <div>
+            <h2>📋 My Jobs</h2>
+            <p class="section-desc">Jobs you've accepted or already finished.</p>
+          </div>
+        </div>
+        <div id="my-jobs-container" class="job-list">
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>No jobs yet</h3>
+            <p>Once you accept a job, it will appear here. Go to Available Jobs to find work near you.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFILE TAB -->
+      <div id="tab-profile" class="tab-section">
+        <div class="dash-section-header">
+          <div>
+            <h2>👤 My Profile</h2>
+            <p class="section-desc">Your account details and information.</p>
+          </div>
+        </div>
+        <div class="card profile-card-enhanced" id="profile-container">
+          <!-- Profile injected -->
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Real-time Job Pop-up -->
+  <div id="job-popup" class="notification-popup">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+      <span class="new-job-badge">⚡ NEW JOB</span>
+      <strong style="color: var(--purple-light); font-size: 1.25rem; font-weight: 800;" id="popup-price">₹0</strong>
+    </div>
+    <h4 id="popup-title" style="margin-bottom: 0.25rem;">New Job Available</h4>
+    <p id="popup-desc" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">...</p>
+    
+    <div style="display: flex; gap: 0.5rem;">
+      <button class="btn btn-primary btn-block" style="padding: 0.5rem;" onclick="acceptPopupJob()">ACCEPT</button>
+      <button class="btn btn-block" style="padding: 0.5rem;" onclick="closePopup()">SKIP</button>
+    </div>
+  </div>
+
+  <script src="js/particles.js"></script>
+  <script src="js/worker.js"></script>
+  <script>
+    // Welcome time
+    const now = new Date();
+    const hour = now.getHours();
+    const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    const timeStr = now.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const welcomeEl = document.getElementById('welcome-time');
+    if (welcomeEl) welcomeEl.textContent = `${greeting} • ${timeStr}`;
+  </script>
+</body>
+</html>

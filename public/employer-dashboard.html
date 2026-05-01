@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employer Dashboard - Around You</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <nav class="navbar" style="background: rgba(0,0,0,0.6); border-bottom-color: var(--border-glass); box-shadow: 0 4px 30px rgba(0,0,0,0.3);">
+    <div class="container">
+      <div class="navbar-brand">
+        <span style="font-size:1.1rem;">⚡</span> Around You <span class="role-chip">Employer</span>
+      </div>
+      <div class="navbar-nav">
+        <span id="user-name-display" style="font-weight: 500;"></span>
+        <button class="btn btn-primary" onclick="openPostJobModal()">+ Post a Job</button>
+        <button class="btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-grid container">
+    <aside class="sidebar">
+      <ul class="sidebar-nav">
+        <li><a href="#" class="active" id="nav-my-jobs" onclick="switchTab('my-jobs')"><span class="nav-icon">📌</span> My Postings</a></li>
+        <li><a href="#" id="nav-history" onclick="switchTab('history')"><span class="nav-icon">📊</span> Past Jobs</a></li>
+        <li><a href="#" id="nav-profile" onclick="switchTab('profile')"><span class="nav-icon">👤</span> My Profile</a></li>
+      </ul>
+    </aside>
+
+    <main class="main-content">
+      
+      <!-- CURRENT JOBS TAB -->
+      <div id="tab-my-jobs" class="tab-section active">
+        <div class="welcome-banner">
+          <h2>👋 Welcome back!</h2>
+          <p>Manage your job postings and find skilled workers for your tasks.</p>
+          <div class="welcome-time" id="welcome-time"></div>
+        </div>
+
+        <div class="stats-row" id="employer-stats">
+          <div class="stat-card">
+            <div class="stat-icon">📌</div>
+            <div class="stat-value" id="stat-active">0</div>
+            <div class="stat-label">Active Jobs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-value" id="stat-pending">0</div>
+            <div class="stat-label">Pending</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-value" id="stat-completed">0</div>
+            <div class="stat-label">Completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value" id="stat-spent">₹0</div>
+            <div class="stat-label">Total Spent</div>
+          </div>
+        </div>
+
+        <div class="dash-section-header">
+          <div>
+            <h2>📌 My Active Jobs</h2>
+            <p class="section-desc">Jobs you've posted that are waiting for workers or in progress.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openPostJobModal()" style="white-space: nowrap;">+ New Job</button>
+        </div>
+        <div id="jobs-container" class="job-list">
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3>No active jobs</h3>
+            <p>You haven't posted any jobs yet. Click "+ Post a Job" to create your first listing and find skilled workers nearby.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY TAB -->
+      <div id="tab-history" class="tab-section">
+        <div class="dash-section-header">
+          <div>
+            <h2>📊 Past Jobs</h2>
+            <p class="section-desc">Jobs that have been completed and paid.</p>
+          </div>
+        </div>
+        <div id="history-container" class="job-list">
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>No completed jobs yet</h3>
+            <p>Your completed job history will appear here once jobs are finished and paid.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFILE TAB -->
+      <div id="tab-profile" class="tab-section">
+        <div class="dash-section-header">
+          <div>
+            <h2>👤 My Profile</h2>
+            <p class="section-desc">Your account details and information.</p>
+          </div>
+        </div>
+        <div class="card profile-card-enhanced" id="profile-container">
+          <!-- Profile injected here -->
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Post Job Modal -->
+  <div class="modal-overlay" id="postJobModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="margin: 0;">Post a New Job</h3>
+        <button class="close-btn" onclick="closePostJobModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="handlePostJob(event)">
+          <div class="form-group">
+            <label>Job Title</label>
+            <input type="text" id="job-title" required placeholder="e.g. Mason, Electrician, Painter">
+          </div>
+          <div class="form-group">
+            <label>Job Description</label>
+            <textarea id="job-desc" rows="3" required placeholder="Describe what the worker needs to do..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Pay (₹)</label>
+            <input type="number" id="job-price" required placeholder="Amount you'll pay">
+          </div>
+          <div class="form-group">
+            <label>Your Location</label>
+            <button type="button" class="btn btn-primary btn-block" onclick="captureLocation(this)">📍 Share My Location</button>
+            <input type="hidden" id="job-lat" required>
+            <input type="hidden" id="job-lng" required>
+            <p id="location-status" style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--green); display: none;">✓ Location captured</p>
+          </div>
+          <button type="submit" class="btn btn-success btn-block" style="margin-top: 1rem;">Post Job</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal-overlay" id="paymentModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="margin: 0;">💳 Pay Worker</h3>
+        <button class="close-btn" onclick="closePaymentModal()">&times;</button>
+      </div>
+      <div class="modal-body text-center">
+        <h4 style="color: var(--text-muted)">You're paying the worker</h4>
+        <h2 style="font-size: 2.5rem; margin: 1rem 0" id="payment-amount">₹0</h2>
+        <div class="payment-scanner" id="payment-scanner" style="display:none;"></div>
+        <p id="payment-status-text" style="color: var(--purple-light); margin-bottom: 2rem;">Click below to proceed with payment.</p>
+        <button class="btn btn-success btn-block" id="confirm-pay-btn" onclick="executePayment()">Pay Now</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/particles.js"></script>
+  <script src="js/employer.js"></script>
+  <script>
+    const now = new Date();
+    const hour = now.getHours();
+    const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    const timeStr = now.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const welcomeEl = document.getElementById('welcome-time');
+    if (welcomeEl) welcomeEl.textContent = `${greeting} • ${timeStr}`;
+  </script>
+</body>
+</html>

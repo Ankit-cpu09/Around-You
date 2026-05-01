@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Payment - Around You</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',-apple-system,sans-serif;background:#000;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;-webkit-font-smoothing:antialiased;overflow:hidden}
+    .bg-gradient{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 50% at 20% 30%,rgba(139,92,246,.15) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 80% 70%,rgba(6,182,212,.1) 0%,transparent 55%);animation:bgP 8s ease-in-out infinite alternate}
+    @keyframes bgP{0%{opacity:.6}100%{opacity:1}}
+
+    /* Floating orbs */
+    .orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0}
+    .orb-1{width:300px;height:300px;background:rgba(139,92,246,.12);top:-10%;left:-5%;animation:orbFloat1 12s ease-in-out infinite}
+    .orb-2{width:250px;height:250px;background:rgba(6,182,212,.08);bottom:-10%;right:-5%;animation:orbFloat2 15s ease-in-out infinite}
+    .orb-3{width:200px;height:200px;background:rgba(139,92,246,.06);top:50%;left:60%;animation:orbFloat3 10s ease-in-out infinite}
+    @keyframes orbFloat1{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,40px)}}
+    @keyframes orbFloat2{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,-30px)}}
+    @keyframes orbFloat3{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,50px)}}
+
+    /* Grid lines bg */
+    .grid-bg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(139,92,246,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.03) 1px,transparent 1px);background-size:60px 60px;animation:gridMove 20s linear infinite}
+    @keyframes gridMove{0%{background-position:0 0}100%{background-position:60px 60px}}
+    .checkout-container{position:relative;z-index:1;width:100%;max-width:500px;padding:1.5rem}
+    .checkout-card{background:rgba(12,10,22,.85);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:2.5rem;box-shadow:0 0 60px rgba(139,92,246,.1),0 20px 60px rgba(0,0,0,.5);animation:cardIn .6s ease backwards;position:relative}
+    .checkout-card::before{content:'';position:absolute;inset:-1px;border-radius:24px;padding:1px;background:linear-gradient(135deg,rgba(139,92,246,.4),transparent 40%,transparent 60%,rgba(6,182,212,.3));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:0;transition:opacity .5s ease}
+    .checkout-card:hover::before{opacity:1}
+    @keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .checkout-header{text-align:center;margin-bottom:1.5rem;padding-bottom:1.25rem;border-bottom:1px solid rgba(255,255,255,.06);animation:cardIn .6s ease backwards .1s}
+    .checkout-logo{font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:1rem;letter-spacing:-.5px}.checkout-logo span{color:#8B5CF6}
+    .amount-display{font-size:3rem;font-weight:900;background:linear-gradient(135deg,#fff 0%,#A78BFA 50%,#06b6d4 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:.5rem 0 .15rem;line-height:1;animation:amtShimmer 3s ease infinite}
+    @keyframes amtShimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .job-title-display{color:#94A3B8;font-size:.88rem}
+    .secure-badge{display:inline-flex;align-items:center;gap:6px;font-size:.68rem;color:#10b981;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);padding:4px 12px;border-radius:999px;margin-top:.85rem;text-transform:uppercase;letter-spacing:1px;font-weight:600}
+
+    /* Payment Method Tabs */
+    .method-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1.5rem}
+    .method-tab{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.7rem .4rem;text-align:center;cursor:pointer;transition:all .3s;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.5px}
+    .method-tab:hover{border-color:rgba(139,92,246,.3);color:#A78BFA;background:rgba(139,92,246,.04)}
+    .method-tab.active{border-color:#8B5CF6;color:#A78BFA;background:rgba(139,92,246,.08);box-shadow:0 0 16px rgba(139,92,246,.15)}
+    .method-tab .tab-icon{font-size:1.4rem;display:block;margin-bottom:.35rem}
+    .method-section{display:none;animation:cardIn .35s ease}
+    .method-section.active{display:block}
+
+    /* Form */
+    .form-group{margin-bottom:1.1rem}
+    .form-group label{display:block;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:.45rem}
+    .form-group input{width:100%;padding:.8rem 1rem;background:rgba(5,3,12,.9);border:1px solid rgba(255,255,255,.08);border-radius:12px;color:#fff;font-family:inherit;font-size:.92rem;transition:all .3s;letter-spacing:.5px}
+    .form-group input:focus{outline:none;border-color:#8B5CF6;box-shadow:0 0 0 3px rgba(139,92,246,.12)}
+    .form-group input::placeholder{color:#334155}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+
+    /* Card preview */
+    .card-preview{background:linear-gradient(135deg,#1e1b4b,#312e81,#1e1b4b);border-radius:16px;padding:1.25rem;margin-bottom:1.25rem;border:1px solid rgba(139,92,246,.25);position:relative;overflow:hidden;transition:all .4s ease;animation:cardIn .5s ease backwards .2s}
+    .card-preview:hover{transform:translateY(-3px) rotateX(2deg);box-shadow:0 8px 30px rgba(139,92,246,.2)}
+    .card-preview::before{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(139,92,246,.15),transparent 70%);pointer-events:none;animation:holoShift 6s ease-in-out infinite}
+    .card-preview::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.04),transparent);animation:cardShine 4s ease-in-out infinite}
+    @keyframes holoShift{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,10px)}}
+    @keyframes cardShine{0%{left:-100%}50%{left:150%}100%{left:150%}}
+    .card-preview .card-type{font-size:.68rem;color:#A78BFA;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:.6rem}
+    .card-preview .card-number{font-size:1.05rem;color:#E2E8F0;letter-spacing:3px;font-weight:500}
+
+    /* UPI section */
+    .upi-options{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1.25rem}
+    .upi-option{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem;text-align:center;cursor:pointer;transition:all .3s;font-size:.78rem;font-weight:600;color:#94A3B8}
+    .upi-option:hover,.upi-option.selected{border-color:#8B5CF6;color:#fff;background:rgba(139,92,246,.08)}
+    .upi-option .upi-icon{font-size:1.5rem;display:block;margin-bottom:.3rem}
+    .upi-qr{text-align:center;margin:1rem 0;padding:1.5rem;background:rgba(255,255,255,.95);border-radius:16px;display:none}
+    .upi-qr.show{display:block;animation:cardIn .3s ease}
+    .upi-qr canvas{border-radius:8px}
+
+    /* Cash section */
+    .cash-info{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem}
+    .cash-info h4{color:#f59e0b;font-size:.9rem;margin-bottom:.5rem;font-weight:700}
+    .cash-info p{color:#94A3B8;font-size:.82rem;line-height:1.6}
+    .cash-info ul{color:#94A3B8;font-size:.82rem;margin-top:.5rem;padding-left:1.2rem;line-height:1.8}
+
+    /* Net Banking */
+    .bank-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin-bottom:1.25rem}
+    .bank-option{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem;text-align:center;cursor:pointer;transition:all .3s;font-size:.78rem;font-weight:600;color:#94A3B8}
+    .bank-option:hover,.bank-option.selected{border-color:#8B5CF6;color:#fff;background:rgba(139,92,246,.08)}
+
+    /* Pay Button */
+    .pay-btn{width:100%;padding:1rem;background:linear-gradient(135deg,#8B5CF6,#7C3AED);border:none;border-radius:14px;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .35s;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 20px rgba(139,92,246,.35);margin-top:.5rem;position:relative;overflow:hidden}
+    .pay-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transition:left .5s ease}
+    .pay-btn:hover::before{left:100%}
+    .pay-btn:hover:not(:disabled){background:linear-gradient(135deg,#A78BFA,#8B5CF6);transform:translateY(-3px);box-shadow:0 8px 32px rgba(139,92,246,.5)}
+    .pay-btn:active:not(:disabled){transform:translateY(0);box-shadow:0 2px 12px rgba(139,92,246,.3)}
+    .pay-btn:disabled{opacity:.5;cursor:not-allowed}
+    .pay-btn.processing{background:linear-gradient(135deg,#6D28D9,#5B21B6);animation:processPulse 1.5s ease-in-out infinite}
+    @keyframes processPulse{0%,100%{box-shadow:0 4px 20px rgba(139,92,246,.3)}50%{box-shadow:0 4px 30px rgba(139,92,246,.6)}}
+    .cancel-link{display:block;text-align:center;margin-top:1.15rem;color:#64748B;font-size:.82rem;text-decoration:none;transition:color .3s}
+    .cancel-link:hover{color:#ef4444}
+
+    /* Success */
+    .success-state{display:none;text-align:center;padding:2rem 0;animation:cardIn .5s ease backwards}
+    .success-state.show{display:block}
+    .success-icon{width:80px;height:80px;border-radius:50%;background:rgba(16,185,129,.1);border:2px solid #10b981;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2.2rem;animation:sPop .5s cubic-bezier(.34,1.56,.64,1) backwards .2s;box-shadow:0 0 30px rgba(16,185,129,.2)}
+    @keyframes sPop{from{transform:scale(0) rotate(-180deg)}to{transform:scale(1) rotate(0)}}
+    .success-state h2{animation:cardIn .5s ease backwards .4s}
+    .success-state p{animation:cardIn .5s ease backwards .5s}
+    .success-btn{animation:cardIn .5s ease backwards .6s}
+    .success-state h2{color:#fff;font-size:1.4rem;margin-bottom:.5rem}
+    .success-state p{color:#94A3B8;margin-bottom:.35rem;font-size:.9rem}
+    .success-state .method-used{color:#64748B;font-size:.78rem;margin-bottom:1.5rem}
+    .success-btn{display:inline-block;padding:.8rem 2rem;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);border-radius:999px;color:#A78BFA;font-weight:600;font-size:.82rem;text-decoration:none;text-transform:uppercase;letter-spacing:1px;transition:all .3s}
+    .success-btn:hover{background:#8B5CF6;color:#fff;border-color:#8B5CF6}
+    .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:8px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .error-msg{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#ef4444;padding:.7rem 1rem;border-radius:10px;font-size:.82rem;margin-bottom:1rem;display:none;text-align:center}
+    .error-msg.show{display:block;animation:cardIn .3s ease}
+    .checkout-footer{text-align:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.04);color:#334155;font-size:.68rem;letter-spacing:.5px}
+  </style>
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="grid-bg"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="checkout-container">
+    <div class="checkout-card">
+      <div id="payment-form-section">
+        <div class="checkout-header">
+          <div class="checkout-logo">Around <span>You</span> Pay</div>
+          <div class="job-title-display" id="job-title">Loading...</div>
+          <div class="amount-display" id="amount-display">₹0</div>
+          <div class="secure-badge">🔒 Secure Payment</div>
+        </div>
+
+        <!-- Payment Method Tabs -->
+        <div class="method-tabs">
+          <div class="method-tab active" onclick="switchMethod('card')">
+            <span class="tab-icon">💳</span>Card
+          </div>
+          <div class="method-tab" onclick="switchMethod('upi')">
+            <span class="tab-icon">📱</span>UPI
+          </div>
+          <div class="method-tab" onclick="switchMethod('netbanking')">
+            <span class="tab-icon">🏦</span>Banking
+          </div>
+          <div class="method-tab" onclick="switchMethod('cash')">
+            <span class="tab-icon">💵</span>Cash
+          </div>
+        </div>
+
+        <div id="error-msg" class="error-msg"></div>
+
+        <!-- CARD METHOD -->
+        <div id="method-card" class="method-section active">
+          <div class="card-preview">
+            <div class="card-type">Credit / Debit Card</div>
+            <div class="card-number" id="card-number-preview">•••• •••• •••• ••••</div>
+          </div>
+          <form id="card-form" onsubmit="handlePayment(event,'card')">
+            <div class="form-group"><label>Card Number</label><input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" required oninput="formatCard(this)"></div>
+            <div class="form-group"><label>Cardholder Name</label><input type="text" id="card-name" placeholder="Name on card" required></div>
+            <div class="form-row">
+              <div class="form-group"><label>Expiry</label><input type="text" id="card-expiry" placeholder="MM / YY" maxlength="7" required oninput="formatExpiry(this)"></div>
+              <div class="form-group"><label>CVV</label><input type="password" id="card-cvv" placeholder="•••" maxlength="4" required></div>
+            </div>
+            <button type="submit" class="pay-btn" id="pay-btn-card">Pay <span class="btn-amt">₹0</span></button>
+          </form>
+        </div>
+
+        <!-- UPI METHOD -->
+        <div id="method-upi" class="method-section">
+          <div class="upi-options">
+            <div class="upi-option selected" onclick="selectUPI(this,'gpay')"><span class="upi-icon">📲</span>Google Pay</div>
+            <div class="upi-option" onclick="selectUPI(this,'phonepe')"><span class="upi-icon">📲</span>PhonePe</div>
+            <div class="upi-option" onclick="selectUPI(this,'paytm')"><span class="upi-icon">📲</span>Paytm</div>
+          </div>
+          <form id="upi-form" onsubmit="handlePayment(event,'upi')">
+            <div class="form-group"><label>UPI ID</label><input type="text" id="upi-id" placeholder="yourname@upi" required></div>
+            <button type="submit" class="pay-btn" id="pay-btn-upi">Pay via UPI <span class="btn-amt">₹0</span></button>
+          </form>
+        </div>
+
+        <!-- NET BANKING METHOD -->
+        <div id="method-netbanking" class="method-section">
+          <div class="bank-grid">
+            <div class="bank-option selected" onclick="selectBank(this,'sbi')">🏦 SBI</div>
+            <div class="bank-option" onclick="selectBank(this,'hdfc')">🏦 HDFC</div>
+            <div class="bank-option" onclick="selectBank(this,'icici')">🏦 ICICI</div>
+            <div class="bank-option" onclick="selectBank(this,'axis')">🏦 Axis Bank</div>
+            <div class="bank-option" onclick="selectBank(this,'bob')">🏦 Bank of Baroda</div>
+            <div class="bank-option" onclick="selectBank(this,'pnb')">🏦 PNB</div>
+          </div>
+          <form id="nb-form" onsubmit="handlePayment(event,'netbanking')">
+            <button type="submit" class="pay-btn" id="pay-btn-nb">Pay via Net Banking <span class="btn-amt">₹0</span></button>
+          </form>
+        </div>
+
+        <!-- CASH METHOD -->
+        <div id="method-cash" class="method-section">
+          <div class="cash-info">
+            <h4>💵 Cash After Work</h4>
+            <p>Pay the worker directly in cash once the job is completed.</p>
+            <ul>
+              <li>Worker completes the job at your location</li>
+              <li>You verify the work and hand over cash</li>
+              <li>Both parties confirm completion on the app</li>
+            </ul>
+          </div>
+          <form id="cash-form" onsubmit="handlePayment(event,'cash')">
+            <button type="submit" class="pay-btn" id="pay-btn-cash" style="background:#f59e0b;box-shadow:0 4px 20px rgba(245,158,11,.3)">Confirm Cash Payment <span class="btn-amt">₹0</span></button>
+          </form>
+        </div>
+
+        <a href="/employer-dashboard.html" class="cancel-link">Cancel Payment</a>
+        <div class="checkout-footer">Payments are processed securely. Your details are encrypted.</div>
+      </div>
+
+      <!-- Success State -->
+      <div id="success-state" class="success-state">
+        <div class="success-icon">✓</div>
+        <h2>Payment Successful!</h2>
+        <p>The worker has been paid. Job marked as complete.</p>
+        <p class="method-used" id="method-used-text">Paid via Card</p>
+        <a href="/employer-dashboard.html" class="success-btn">Back to Dashboard</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/index.html';
+
+    const params = new URLSearchParams(window.location.search);
+    const sessionToken = params.get('session');
+    const jobId = params.get('job_id');
+    const amount = params.get('amount');
+    const jobTitle = params.get('title');
+    if (!sessionToken || !jobId) window.location.href = '/employer-dashboard.html';
+
+    const amtStr = `₹${parseFloat(amount).toLocaleString('en-IN')}`;
+    document.getElementById('amount-display').textContent = amtStr;
+    document.getElementById('job-title').textContent = decodeURIComponent(jobTitle || 'Job Payment');
+    document.querySelectorAll('.btn-amt').forEach(el => el.textContent = amtStr);
+
+    let selectedMethod = 'card';
+    let selectedUPI = 'gpay';
+    let selectedBank = 'sbi';
+
+    function switchMethod(method) {
+      selectedMethod = method;
+      document.querySelectorAll('.method-tab').forEach((t,i) => t.classList.toggle('active', ['card','upi','netbanking','cash'][i] === method));
+      document.querySelectorAll('.method-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('method-' + method).classList.add('active');
+      document.querySelectorAll('.error-msg').forEach(e => e.classList.remove('show'));
+    }
+
+    function selectUPI(el, provider) {
+      selectedUPI = provider;
+      document.querySelectorAll('.upi-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function selectBank(el, bank) {
+      selectedBank = bank;
+      document.querySelectorAll('.bank-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function formatCard(input) {
+      let val = input.value.replace(/\D/g, '').substring(0, 16);
+      input.value = val.replace(/(\d{4})(?=\d)/g, '$1 ');
+      const preview = val.padEnd(16, '•');
+      document.getElementById('card-number-preview').textContent = preview.replace(/(.{4})/g, '$1 ').trim();
+    }
+
+    function formatExpiry(input) {
+      let val = input.value.replace(/\D/g, '').substring(0, 4);
+      if (val.length >= 2) val = val.substring(0, 2) + ' / ' + val.substring(2);
+      input.value = val;
+    }
+
+    function showError(msg) {
+      const e = document.getElementById('error-msg');
+      e.textContent = msg;
+      e.classList.add('show');
+    }
+
+    const methodLabels = { card: 'Card', upi: 'UPI', netbanking: 'Net Banking', cash: 'Cash' };
+
+    async function handlePayment(e, method) {
+      e.preventDefault();
+      const btn = document.getElementById('pay-btn-' + (method === 'netbanking' ? 'nb' : method));
+      document.getElementById('error-msg').classList.remove('show');
+
+      // Validate per method
+      if (method === 'card') {
+        const cn = document.getElementById('card-number').value.replace(/\s/g, '');
+        if (cn.length < 13) { showError('Enter a valid card number'); return; }
+        if (document.getElementById('card-cvv').value.length < 3) { showError('Enter a valid CVV'); return; }
+      }
+      if (method === 'upi') {
+        const upiId = document.getElementById('upi-id').value.trim();
+        if (!upiId.includes('@')) { showError('Enter a valid UPI ID (e.g. name@upi)'); return; }
+      }
+
+      btn.disabled = true;
+      const origHTML = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner"></span> Processing...';
+      btn.classList.add('processing');
+
+      await new Promise(r => setTimeout(r, method === 'cash' ? 1000 : 2200));
+
+      try {
+        const cardNum = method === 'card' ? document.getElementById('card-number').value.replace(/\s/g, '') : '';
+        const res = await fetch('/api/jobs/confirm-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            session_token: sessionToken,
+            card_last4: cardNum.slice(-4) || '0000',
+            payment_method: method,
+            upi_provider: method === 'upi' ? selectedUPI : undefined,
+            bank: method === 'netbanking' ? selectedBank : undefined
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          document.getElementById('payment-form-section').style.display = 'none';
+          document.getElementById('method-used-text').textContent = `Paid via ${methodLabels[method]}`;
+          document.getElementById('success-state').classList.add('show');
+        } else {
+          btn.disabled = false; btn.classList.remove('processing'); btn.innerHTML = origHTML;
+          showError(data.message || 'Payment failed.');
+        }
+      } catch (err) {
+        btn.disabled = false; btn.classList.remove('processing'); btn.innerHTML = origHTML;
+        showError('Connection error. Check your internet.');
+      }
+    }
+  </script>
+</body>
+</html>
