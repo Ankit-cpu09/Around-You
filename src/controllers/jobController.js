@@ -1,5 +1,10 @@
 const pool = require('../config/db');
-const { getIo } = require('../sockets/jobSockets'); 
+let getIo;
+try {
+  getIo = require('../sockets/jobSockets').getIo;
+} catch (e) {
+  getIo = () => null;
+}
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const createJob = async (req, res) => {
