@@ -1,5 +1,6 @@
-CREATE DATABASE IF NOT EXISTS kaamsetu_db;
-USE kaamsetu_db;
+-- Schema for Around You (KaamSetu) Platform
+-- Compatible with TiDB Cloud, Aiven, and other cloud MySQL providers
+-- Note: Database is pre-created by cloud provider, no CREATE DATABASE needed
 
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -7,7 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone VARCHAR(20) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   role ENUM('employer', 'worker') NOT NULL,
-  skills VARCHAR(255) DEFAULT NULL, -- comma separated list
+  skills VARCHAR(255) DEFAULT NULL,
   latitude DECIMAL(10, 8),
   longitude DECIMAL(11, 8),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -22,6 +23,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   latitude DECIMAL(10, 8) NOT NULL,
   longitude DECIMAL(11, 8) NOT NULL,
   status ENUM('pending', 'accepted', 'completed') DEFAULT 'pending',
+  payment_status VARCHAR(20) DEFAULT 'unpaid',
   assigned_worker_id INT DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (employer_id) REFERENCES users(id),
