@@ -16,30 +16,36 @@ document.getElementById('user-name-display').textContent = user.name;
 
 // Initialize Socket
 function initSocket() {
-  socket = io();
-  socket.emit('join', { userId: user.id, role: user.role });
+  try {
+    socket = io();
+    socket.emit('join', { userId: user.id, role: user.role });
 
-  socket.on('new_job_posted', (job) => {
-    showJobPopup(job);
-    loadAvailableJobs();
-    try {
-      // Small futuristic beep
-      const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAD//w=='); 
-      audio.play().catch(()=>{});
-    } catch(e) {}
-  });
+    socket.on('new_job_posted', (job) => {
+      showJobPopup(job);
+      loadAvailableJobs();
+      updateAllStats();
+      try {
+        const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAD//w=='); 
+        audio.play().catch(()=>{});
+      } catch(e) {}
+    });
 
-  socket.on('job_accepted', (data) => {
-    if(currentPopupJobId == data.jobId) {
-      closePopup();
-    }
-    loadAvailableJobs();
-  });
+    socket.on('job_accepted', (data) => {
+      if(currentPopupJobId == data.jobId) {
+        closePopup();
+      }
+      loadAvailableJobs();
+      updateAllStats();
+    });
 
-  socket.on('payment_received', (data) => {
-    alert(`You received ₹${data.amount} for Job #${data.jobId}!`);
-    loadMyJobs(); // refresh if they are on my jobs
-  });
+    socket.on('payment_received', (data) => {
+      alert(`You received ₹${data.amount} for Job #${data.jobId}!`);
+      loadMyJobs();
+      updateAllStats();
+    });
+  } catch(e) {
+    console.log('Socket.io not available (serverless mode)');
+  }
 }
 
 function showJobPopup(job) {
@@ -56,18 +62,86 @@ function closePopup() {
 }
 
 function switchTab(tabId) {
-  // Update navs
   document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
   document.getElementById('nav-' + tabId).classList.add('active');
 
-  // Update tabs
   document.querySelectorAll('.tab-section').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + tabId).classList.add('active');
 
-  // Fetch logic
   if (tabId === 'available-jobs') loadAvailableJobs();
   if (tabId === 'my-jobs') loadMyJobs();
   if (tabId === 'profile') loadProfile();
+}
+
+// Update all stat counters by fetching both available and worker jobs
+async function updateAllStats() {
+  try {
+    // Fetch available jobs count
+    const availRes = await fetch('/api/jobs/available', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const availJobs = await availRes.json();
+    const availCount = Array.isArray(availJobs) ? availJobs.length : 0;
+
+    // Fetch my jobs (accepted + completed)
+    const myRes = await fetch('/api/jobs/worker-jobs', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const myJobs = await myRes.json();
+
+    let acceptedCount = 0;
+    let completedCount = 0;
+
+    if (Array.isArray(myJobs)) {
+      acceptedCount = myJobs.filter(j => j.status === 'accepted').length;
+      completedCount = myJobs.filter(j => j.status === 'completed').length;
+    }
+
+    // Animate stat updates
+    animateStat('stat-available', availCount);
+    animateStat('stat-accepted', acceptedCount);
+    animateStat('stat-completed', completedCount);
+
+  } catch (error) {
+    console.error('Error updating stats:', error);
+  }
+}
+
+// Smooth number animation for stats
+function animateStat(elementId, targetValue) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+
+  const currentValue = parseInt(el.textContent) || 0;
+  if (currentValue === targetValue) return;
+
+  // Quick animation
+  const duration = 400;
+  const startTime = performance.now();
+
+  function step(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    // Ease out
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const value = Math.round(currentValue + (targetValue - currentValue) * eased);
+    el.textContent = value;
+    
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      el.textContent = targetValue;
+      // Flash effect on change
+      if (currentValue !== targetValue) {
+        el.style.transform = 'scale(1.2)';
+        el.style.transition = 'transform 0.3s ease';
+        setTimeout(() => {
+          el.style.transform = 'scale(1)';
+        }, 300);
+      }
+    }
+  }
+  requestAnimationFrame(step);
 }
 
 async function loadAvailableJobs() {
@@ -78,8 +152,13 @@ async function loadAvailableJobs() {
     const jobs = await res.json();
     const container = document.getElementById('jobs-container');
     
-    if (jobs.length === 0) {
-      container.innerHTML = `<div class="card"><p>No jobs available right now. Check back soon!</p></div>`;
+    if (!Array.isArray(jobs) || jobs.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🔎</div>
+          <h3>No jobs available right now</h3>
+          <p>New jobs will appear here in real-time as employers post them. Stay online to receive instant notifications!</p>
+        </div>`;
       return;
     }
 
@@ -98,6 +177,13 @@ async function loadAvailableJobs() {
     `).join('');
   } catch (error) {
     console.error('Error loading available jobs:', error);
+    document.getElementById('jobs-container').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h3>Connection error</h3>
+        <p>Couldn't load jobs. Please check your internet and try again.</p>
+        <button class="btn btn-primary" onclick="loadAvailableJobs(); updateAllStats();" style="margin-top:1rem;">Retry</button>
+      </div>`;
   }
 }
 
@@ -109,8 +195,13 @@ async function loadMyJobs() {
     const jobs = await res.json();
     const container = document.getElementById('my-jobs-container');
     
-    if (jobs.length === 0) {
-      container.innerHTML = `<div class="card"><p>You haven't taken any jobs yet.</p></div>`;
+    if (!Array.isArray(jobs) || jobs.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <h3>No jobs yet</h3>
+          <p>Once you accept a job, it will appear here. Go to Available Jobs to find work near you.</p>
+        </div>`;
       return;
     }
 
@@ -118,7 +209,7 @@ async function loadMyJobs() {
       <div class="card job-card">
         <div>
           <span class="job-status status-${job.status}">${job.status}</span>
-          <span class="payment-status-badge pay-${job.payment_status || 'pending'}">PAYMENT: ${job.payment_status || 'PENDING'}</span>
+          <span class="payment-status-badge pay-${job.payment_status || 'pending'}">PAYMENT: ${(job.payment_status || 'PENDING').toUpperCase()}</span>
         </div>
         <div class="job-price">₹${job.price}</div>
         <h3>${job.title}</h3>
@@ -133,6 +224,13 @@ async function loadMyJobs() {
     `).join('');
   } catch(error) {
     console.error(error);
+    document.getElementById('my-jobs-container').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h3>Connection error</h3>
+        <p>Couldn't load your jobs. Please try again.</p>
+        <button class="btn btn-primary" onclick="loadMyJobs(); updateAllStats();" style="margin-top:1rem;">Retry</button>
+      </div>`;
   }
 }
 
@@ -165,6 +263,7 @@ async function acceptJob(jobId) {
     } else {
       alert(data.message || 'This job was already taken by someone else.');
       loadAvailableJobs();
+      updateAllStats();
     }
   } catch(error) {
     alert('Something went wrong. Check your connection.');
@@ -176,5 +275,10 @@ function logout() {
   window.location.href = '/index.html';
 }
 
+// Initialize everything
 initSocket();
 loadAvailableJobs();
+updateAllStats();
+
+// Auto-refresh stats every 30 seconds
+setInterval(updateAllStats, 30000);

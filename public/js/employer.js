@@ -16,28 +16,102 @@ if (!token || !user || user.role !== 'employer') {
 
 // Initialize Socket
 function initSocket() {
-  socket = io();
-  socket.emit('join', { userId: user.id, role: user.role });
+  try {
+    socket = io();
+    socket.emit('join', { userId: user.id, role: user.role });
 
-  socket.on('job_accepted', (data) => {
-    loadJobs();
-    alert('A worker has accepted your job!');
-  });
+    socket.on('job_accepted', (data) => {
+      loadJobs();
+      updateAllStats();
+      alert('A worker has accepted your job!');
+    });
+  } catch(e) {
+    console.log('Socket.io not available (serverless mode)');
+  }
 }
 
 function switchTab(tabId) {
-  // Update navs
   document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
   document.getElementById('nav-' + tabId).classList.add('active');
 
-  // Update tabs
   document.querySelectorAll('.tab-section').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + tabId).classList.add('active');
 
-  // Reload data context
   if (tabId === 'my-jobs') loadJobs();
   if (tabId === 'history') loadHistory();
   if (tabId === 'profile') loadProfile();
+}
+
+// Update all stat counters
+async function updateAllStats() {
+  try {
+    const res = await fetch('/api/jobs/employer', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        logout();
+        return;
+      }
+      return;
+    }
+
+    const jobs = await res.json();
+    if (!Array.isArray(jobs)) return;
+
+    const activeCount = jobs.filter(j => j.status === 'accepted').length;
+    const pendingCount = jobs.filter(j => j.status === 'pending').length;
+    const completedCount = jobs.filter(j => j.status === 'completed').length;
+    const totalSpent = jobs
+      .filter(j => j.payment_status === 'paid')
+      .reduce((sum, j) => sum + parseFloat(j.price || 0), 0);
+
+    animateStat('stat-active', activeCount);
+    animateStat('stat-pending', pendingCount);
+    animateStat('stat-completed', completedCount);
+
+    // Special handling for ₹ prefix
+    const spentEl = document.getElementById('stat-spent');
+    if (spentEl) spentEl.textContent = `₹${totalSpent.toLocaleString('en-IN')}`;
+
+  } catch (error) {
+    console.error('Error updating stats:', error);
+  }
+}
+
+// Smooth number animation for stats
+function animateStat(elementId, targetValue) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+
+  const currentValue = parseInt(el.textContent) || 0;
+  if (currentValue === targetValue) return;
+
+  const duration = 400;
+  const startTime = performance.now();
+
+  function step(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const value = Math.round(currentValue + (targetValue - currentValue) * eased);
+    el.textContent = value;
+    
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      el.textContent = targetValue;
+      if (currentValue !== targetValue) {
+        el.style.transform = 'scale(1.2)';
+        el.style.transition = 'transform 0.3s ease';
+        setTimeout(() => {
+          el.style.transform = 'scale(1)';
+        }, 300);
+      }
+    }
+  }
+  requestAnimationFrame(step);
 }
 
 async function loadJobs() {
@@ -58,10 +132,15 @@ async function loadJobs() {
     const container = document.getElementById('jobs-container');
     
     // Filter out completed ones for Active Jobs tab
-    const activeJobs = jobs.filter(j => j.status !== 'completed');
+    const activeJobs = Array.isArray(jobs) ? jobs.filter(j => j.status !== 'completed') : [];
 
     if (activeJobs.length === 0) {
-      container.innerHTML = `<div class="card"><p>No active jobs yet. Post a job to get started!</p></div>`;
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <h3>No active jobs</h3>
+          <p>You haven't posted any jobs yet. Click "+ Post a Job" to create your first listing and find skilled workers nearby.</p>
+        </div>`;
       return;
     }
 
@@ -82,7 +161,13 @@ async function loadJobs() {
   } catch (error) {
     console.error('Error loading jobs:', error);
     const container = document.getElementById('jobs-container');
-    if (container) container.innerHTML = `<div class="card"><p style="color: red;">Couldn't load jobs. Please try again.</p></div>`;
+    if (container) container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h3>Connection error</h3>
+        <p>Couldn't load jobs. Please try again.</p>
+        <button class="btn btn-primary" onclick="loadJobs(); updateAllStats();" style="margin-top:1rem;">Retry</button>
+      </div>`;
   }
 }
 
@@ -103,11 +188,15 @@ async function loadHistory() {
     const jobs = await res.json();
     const container = document.getElementById('history-container');
     
-    // Only completed
-    const historyJobs = jobs.filter(j => j.status === 'completed');
+    const historyJobs = Array.isArray(jobs) ? jobs.filter(j => j.status === 'completed') : [];
 
     if (historyJobs.length === 0) {
-      container.innerHTML = `<div class="card"><p>No completed jobs yet.</p></div>`;
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <h3>No completed jobs yet</h3>
+          <p>Your completed job history will appear here once jobs are finished and paid.</p>
+        </div>`;
       return;
     }
 
@@ -115,7 +204,7 @@ async function loadHistory() {
       <div class="card job-card">
         <div>
           <span class="job-status status-${job.status}">${job.status}</span>
-          <span class="payment-status-badge pay-${job.payment_status || 'pending'}">PAYMENT: ${job.payment_status || 'PENDING'}</span>
+          <span class="payment-status-badge pay-${job.payment_status || 'pending'}">PAYMENT: ${(job.payment_status || 'PENDING').toUpperCase()}</span>
         </div>
         <div class="job-price">₹${job.price}</div>
         <h3>${job.title}</h3>
@@ -125,7 +214,13 @@ async function loadHistory() {
   } catch(error) {
     console.error(error);
     const container = document.getElementById('history-container');
-    if (container) container.innerHTML = `<div class="card"><p style="color: red;">Couldn't load history. Please try again.</p></div>`;
+    if (container) container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h3>Connection error</h3>
+        <p>Couldn't load history. Please try again.</p>
+        <button class="btn btn-primary" onclick="loadHistory();" style="margin-top:1rem;">Retry</button>
+      </div>`;
   }
 }
 
@@ -193,7 +288,6 @@ async function checkPaymentReturn() {
   const jobId = urlParams.get('job_id');
 
   if (sessionId && jobId) {
-    // Notify user we are verifying
     alert("Verifying your payment...");
     
     try {
@@ -210,6 +304,7 @@ async function checkPaymentReturn() {
       if(res.ok && data.success) {
         alert("Payment done! The job is marked as complete.");
         switchTab('history');
+        updateAllStats();
       } else {
         alert("Payment wasn't completed.");
       }
@@ -218,7 +313,6 @@ async function checkPaymentReturn() {
       alert("Error verifying payment.");
     }
     
-    // Clear URL to prevent re-verification
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 }
@@ -281,6 +375,7 @@ async function handlePostJob(e) {
       document.getElementById('location-status').style.display = 'none';
       document.querySelector('button[onclick="captureLocation(this)"]').style.display = 'block';
       loadJobs();
+      updateAllStats();
     } else {
       const data = await res.json();
       alert(data.message || 'Error posting job.');
@@ -296,7 +391,11 @@ function logout() {
   window.location.href = '/index.html';
 }
 
-// Init
+// Initialize everything
 initSocket();
 loadJobs();
+updateAllStats();
 checkPaymentReturn();
+
+// Auto-refresh stats every 30 seconds
+setInterval(updateAllStats, 30000);
