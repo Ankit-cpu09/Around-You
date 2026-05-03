@@ -7,8 +7,6 @@
  */
 
 const mysql = require('mysql2/promise');
-const fs = require('fs');
-const path = require('path');
 require('dotenv').config();
 
 async function initCloudDB() {
@@ -25,7 +23,6 @@ async function initCloudDB() {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    multipleStatements: true
   };
 
   if (process.env.DB_SSL === 'true') {
@@ -36,36 +33,86 @@ async function initCloudDB() {
     const connection = await mysql.createConnection(config);
     console.log('✅ Connected to cloud database!\n');
 
-    // Read and execute schema
-    const schemaPath = path.join(__dirname, 'schema.sql');
-    const schema = fs.readFileSync(schemaPath, 'utf8');
+    // Create tables in dependency order (no foreign key issues)
+    const tables = [
+      {
+        name: 'users',
+        sql: `CREATE TABLE IF NOT EXISTS users (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          name VARCHAR(100) NOT NULL,
+          phone VARCHAR(20) NOT NULL UNIQUE,
+          password VARCHAR(255) NOT NULL,
+          role ENUM('employer', 'worker') NOT NULL,
+          skills VARCHAR(255) DEFAULT NULL,
+          latitude DECIMAL(10, 8),
+          longitude DECIMAL(11, 8),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`
+      },
+      {
+        name: 'jobs',
+        sql: `CREATE TABLE IF NOT EXISTS jobs (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          employer_id INT NOT NULL,
+          title VARCHAR(255) NOT NULL,
+          description TEXT,
+          price DECIMAL(10, 2) NOT NULL,
+          latitude DECIMAL(10, 8) NOT NULL,
+          longitude DECIMAL(11, 8) NOT NULL,
+          status ENUM('pending', 'accepted', 'completed') DEFAULT 'pending',
+          payment_status VARCHAR(20) DEFAULT 'unpaid',
+          assigned_worker_id INT DEFAULT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (employer_id) REFERENCES users(id),
+          FOREIGN KEY (assigned_worker_id) REFERENCES users(id)
+        )`
+      },
+      {
+        name: 'applications',
+        sql: `CREATE TABLE IF NOT EXISTS applications (
+          job_id INT NOT NULL,
+          worker_id INT NOT NULL,
+          status ENUM('applied', 'accepted', 'rejected') DEFAULT 'applied',
+          PRIMARY KEY (job_id, worker_id),
+          FOREIGN KEY (job_id) REFERENCES jobs(id),
+          FOREIGN KEY (worker_id) REFERENCES users(id)
+        )`
+      },
+      {
+        name: 'ratings',
+        sql: `CREATE TABLE IF NOT EXISTS ratings (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          from_user_id INT NOT NULL,
+          to_user_id INT NOT NULL,
+          job_id INT NOT NULL,
+          rating INT NOT NULL CHECK(rating >= 1 AND rating <= 5),
+          review TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (from_user_id) REFERENCES users(id),
+          FOREIGN KEY (to_user_id) REFERENCES users(id),
+          FOREIGN KEY (job_id) REFERENCES jobs(id)
+        )`
+      }
+    ];
 
-    // Split by semicolons and execute each statement
-    const statements = schema
-      .split(';')
-      .map(s => s.trim())
-      .filter(s => s.length > 0 && !s.startsWith('--'));
-
-    for (const stmt of statements) {
+    // Execute each table creation in order
+    for (const table of tables) {
       try {
-        await connection.execute(stmt);
-        const tableName = stmt.match(/CREATE TABLE.*?(\w+)\s*\(/i);
-        if (tableName) {
-          console.log(`✅ Created table: ${tableName[1]}`);
-        }
+        await connection.execute(table.sql);
+        console.log(`✅ Created table: ${table.name}`);
       } catch (err) {
         if (err.code === 'ER_TABLE_EXISTS_ERROR') {
-          console.log(`⏭️  Table already exists, skipping...`);
+          console.log(`⏭️  Table ${table.name} already exists, skipping...`);
         } else {
-          console.error(`❌ Error: ${err.message}`);
+          console.error(`❌ Error creating ${table.name}: ${err.message}`);
         }
       }
     }
 
     // Verify tables
-    const [tables] = await connection.execute('SHOW TABLES');
+    const [rows] = await connection.execute('SHOW TABLES');
     console.log('\n📋 Tables in database:');
-    tables.forEach(t => {
+    rows.forEach(t => {
       const name = Object.values(t)[0];
       console.log(`   - ${name}`);
     });
