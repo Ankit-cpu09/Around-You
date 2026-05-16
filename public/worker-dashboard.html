@@ -17,11 +17,27 @@
       </div>
       <div class="navbar-nav">
         <span id="user-name-display" style="font-weight: 500;"></span>
+        <!-- Notification Bell -->
+        <div class="notif-bell-wrap" onclick="toggleNotifPanel()">
+          <span class="notif-bell">🔔</span>
+          <span class="notif-badge" id="notif-badge" style="display: none;">0</span>
+        </div>
         <span id="status-indicator" class="online-badge">ONLINE</span>
         <button class="btn" onclick="logout()">Logout</button>
       </div>
     </div>
   </nav>
+
+  <!-- Notification Dropdown -->
+  <div class="notif-panel" id="notif-panel">
+    <div class="notif-panel-header">
+      <h4>Notifications</h4>
+      <button class="btn btn-sm" onclick="clearNotifications()">Clear All</button>
+    </div>
+    <div class="notif-list" id="notif-list">
+      <div class="notif-empty">No notifications yet</div>
+    </div>
+  </div>
 
   <div class="dashboard-grid container">
     <aside class="sidebar">
@@ -60,10 +76,36 @@
           </div>
         </div>
 
+        <!-- Search & Filter Bar -->
+        <div class="search-filter-bar">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-jobs" placeholder="Search jobs by title or description..." oninput="filterJobs()">
+          </div>
+          <select id="filter-category" class="filter-select" onchange="filterJobs()">
+            <option value="">All Categories</option>
+            <option value="Construction">🏗️ Construction</option>
+            <option value="Cleaning">🧹 Cleaning</option>
+            <option value="Delivery">🚚 Delivery</option>
+            <option value="Plumbing">🔧 Plumbing</option>
+            <option value="Painting">🎨 Painting</option>
+            <option value="Electrical">⚡ Electrical</option>
+            <option value="Gardening">🌱 Gardening</option>
+            <option value="Moving">📦 Moving</option>
+            <option value="Cooking">🍳 Cooking</option>
+            <option value="General">📋 General</option>
+          </select>
+          <select id="sort-jobs" class="filter-select" onchange="filterJobs()">
+            <option value="newest">Newest First</option>
+            <option value="highest">Highest Pay</option>
+            <option value="lowest">Lowest Pay</option>
+          </select>
+        </div>
+
         <div class="dash-section-header">
           <div>
             <h2>🔍 Jobs Near You</h2>
-            <p class="section-desc">Click on any job to view details and accept it.</p>
+            <p class="section-desc">Ask questions, view details, and accept jobs.</p>
           </div>
         </div>
         <div id="jobs-container" class="job-list">
@@ -120,6 +162,55 @@
     <div style="display: flex; gap: 0.5rem;">
       <button class="btn btn-primary btn-block" style="padding: 0.5rem;" onclick="acceptPopupJob()">ACCEPT</button>
       <button class="btn btn-block" style="padding: 0.5rem;" onclick="closePopup()">SKIP</button>
+    </div>
+  </div>
+
+  <!-- Q&A Modal -->
+  <div class="modal-overlay" id="qaModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="margin: 0;">❓ Ask About This Job</h3>
+        <button class="close-btn" onclick="closeQAModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="qa-job-title" style="font-weight: 700; color: var(--primary); margin-bottom: 1rem;"></div>
+        
+        <!-- Existing Q&A -->
+        <div id="qa-list" class="qa-list">
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Loading questions...</p>
+        </div>
+        
+        <!-- Ask new question -->
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>Your Question</label>
+          <textarea id="qa-question-input" rows="2" placeholder="Ask about work details, tools needed, timing, etc..."></textarea>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="submitQuestion()">Send Question</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rating Modal -->
+  <div class="modal-overlay" id="ratingModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="margin: 0;">⭐ Rate Employer</h3>
+        <button class="close-btn" onclick="closeRatingModal()">&times;</button>
+      </div>
+      <div class="modal-body text-center">
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">How was your experience?</p>
+        <div class="star-rating" id="star-rating">
+          <span class="star" data-value="1" onclick="setRating(1)">★</span>
+          <span class="star" data-value="2" onclick="setRating(2)">★</span>
+          <span class="star" data-value="3" onclick="setRating(3)">★</span>
+          <span class="star" data-value="4" onclick="setRating(4)">★</span>
+          <span class="star" data-value="5" onclick="setRating(5)">★</span>
+        </div>
+        <div class="form-group" style="margin-top: 1rem;">
+          <textarea id="rating-review" rows="2" placeholder="Write a short review (optional)..."></textarea>
+        </div>
+        <button class="btn btn-success btn-block" onclick="submitRating()">Submit Rating</button>
+      </div>
     </div>
   </div>
 

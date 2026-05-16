@@ -798,3 +798,655 @@ input::placeholder, textarea::placeholder {
   .container { padding: 0 1rem; }
   .auth-card { padding: 1.75rem; }
 }
+
+/* ==================== OTP INPUT BOXES ==================== */
+.otp-input-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.otp-box {
+  width: 48px !important;
+  height: 56px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  padding: 0;
+  margin: 0;
+  border: 2px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  color: var(--purple-light);
+  caret-color: var(--purple);
+  transition: var(--transition);
+}
+
+.otp-box:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15), 0 0 20px rgba(139, 92, 246, 0.2);
+  transform: scale(1.08);
+}
+
+.otp-separator {
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  margin: 0 0.25rem;
+}
+
+/* ==================== OTP TOAST ==================== */
+.otp-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: rgba(10, 8, 20, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--purple-border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  min-width: 280px;
+  z-index: 5000;
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.3), var(--shadow-lg);
+  transform: translateX(120%);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.otp-toast.show {
+  transform: translateX(0);
+}
+
+.otp-toast-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.otp-toast-header button {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px;
+}
+
+.otp-toast-code {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 8px;
+  text-align: center;
+  color: var(--purple-light);
+  padding: 0.75rem 0;
+  background: rgba(139, 92, 246, 0.06);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--purple-border);
+}
+
+.otp-toast-note {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.otp-toast-timer {
+  height: 3px;
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: 2px;
+  margin-top: 0.75rem;
+  overflow: hidden;
+}
+
+.otp-toast-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--purple), var(--cyan));
+  border-radius: 2px;
+  width: 100%;
+}
+
+/* ==================== AUTH LINKS ==================== */
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+
+.auth-links a {
+  color: var(--purple-light);
+  transition: var(--transition);
+}
+
+.auth-links a:hover {
+  color: #fff;
+}
+
+.auth-step-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.step-badge {
+  display: inline-block;
+  background: var(--purple-subtle);
+  border: 1px solid var(--purple-border);
+  color: var(--purple-light);
+  padding: 0.3rem 1rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Method toggle for SMS/Email */
+.method-toggle {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.method-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.9rem;
+  background: var(--bg-input);
+  color: var(--text-muted);
+}
+
+.method-option input[type="radio"] {
+  display: none;
+}
+
+.method-option.active {
+  border-color: var(--purple);
+  background: var(--purple-subtle);
+  color: var(--purple-light);
+  box-shadow: 0 0 16px rgba(139, 92, 246, 0.15);
+}
+
+/* Auth alerts */
+.auth-alert {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  animation: fadeInDown 0.3s ease;
+}
+
+.auth-alert-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--red);
+}
+
+.auth-alert-success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--green);
+}
+
+/* ==================== SEARCH & FILTER BAR ==================== */
+.search-filter-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.search-input-wrap {
+  flex: 1;
+  min-width: 200px;
+  position: relative;
+}
+
+.search-input-wrap .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.search-input-wrap input {
+  padding-left: 2.5rem;
+  margin-bottom: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-pill);
+}
+
+.filter-select {
+  min-width: 140px;
+  margin-bottom: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-pill);
+  padding: 0.7rem 1rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* ==================== NOTIFICATION BELL ==================== */
+.notif-bell-wrap {
+  position: relative;
+  cursor: pointer;
+  padding: 0.3rem;
+}
+
+.notif-bell {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.notif-bell-wrap:hover .notif-bell {
+  transform: rotate(15deg) scale(1.15);
+}
+
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: var(--red);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulseGlow 2s infinite;
+}
+
+.notif-panel {
+  position: fixed;
+  top: 64px;
+  right: 24px;
+  width: 340px;
+  max-height: 420px;
+  background: rgba(10, 8, 20, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-glow), var(--shadow-lg);
+  z-index: 3000;
+  transform: translateY(-10px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.notif-panel.show {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+.notif-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.notif-panel-header h4 {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.notif-list {
+  max-height: 350px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.notif-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.notif-item {
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.25rem;
+  transition: background 0.2s;
+  cursor: default;
+}
+
+.notif-item:hover {
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.notif-item-title {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+}
+
+.notif-item-body {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.notif-item-time {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* ==================== JOB CARD ENHANCEMENTS ==================== */
+.job-card-top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  color: var(--cyan);
+}
+
+.job-employer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--purple-light);
+  margin: 0.5rem 0;
+}
+
+.phone-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: var(--green) !important;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: var(--transition);
+  text-decoration: none;
+}
+
+.phone-link:hover {
+  background: var(--green);
+  color: #fff !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.3);
+  text-shadow: none;
+}
+
+.rating-badge {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: var(--amber);
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.job-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.job-card-actions .btn-sm {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.75rem;
+}
+
+/* ==================== Q&A SYSTEM ==================== */
+.qa-list {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+  background: rgba(0,0,0,0.2);
+}
+
+.qa-item {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.qa-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.qa-question, .qa-answer {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.qa-label {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: var(--purple-subtle);
+  border: 1px solid var(--purple-border);
+  color: var(--purple-light);
+  margin-top: 2px;
+}
+
+.qa-label-a {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--green);
+}
+
+.qa-question strong, .qa-answer strong {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.qa-question p, .qa-answer p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.qa-pending {
+  font-size: 0.78rem;
+  color: var(--amber);
+  padding-left: 2rem;
+  font-style: italic;
+}
+
+.qa-card {
+  padding: 1.25rem;
+}
+
+.qa-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.qa-job-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--purple-light);
+}
+
+.qa-status-answered {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--green);
+}
+
+.qa-status-pending {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--amber);
+}
+
+.qa-answer-form textarea {
+  margin-bottom: 0;
+  font-size: 0.85rem;
+}
+
+.q-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--red);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  margin-left: 6px;
+}
+
+/* ==================== STAR RATING ==================== */
+.star-rating {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 2.5rem;
+  margin: 1rem 0;
+}
+
+.star {
+  cursor: pointer;
+  color: var(--text-dim);
+  transition: all 0.2s ease;
+  filter: grayscale(1);
+}
+
+.star:hover, .star.active {
+  color: var(--amber);
+  filter: grayscale(0);
+  transform: scale(1.15);
+  text-shadow: 0 0 16px rgba(245, 158, 11, 0.5);
+}
+
+/* ==================== PROFILE ENHANCEMENTS ==================== */
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--cyan));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 auto 1rem;
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.3);
+}
+
+.profile-details p {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.9rem;
+}
+
+.profile-details p:last-child {
+  border-bottom: none;
+}
+
+.profile-card-enhanced {
+  text-align: center;
+  max-width: 400px;
+}
+
+/* ==================== ONLINE BADGE ==================== */
+.online-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--green);
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 1px;
+  animation: pulseGlow 3s infinite;
+}
+
+/* ==================== RESPONSIVE ADDITIONS ==================== */
+@media (max-width: 768px) {
+  .search-filter-bar {
+    flex-direction: column;
+  }
+  .search-input-wrap {
+    min-width: 100%;
+  }
+  .otp-box {
+    width: 40px !important;
+    height: 48px;
+    font-size: 1.2rem;
+  }
+  .otp-toast {
+    right: 12px;
+    left: 12px;
+    min-width: auto;
+  }
+  .notif-panel {
+    right: 8px;
+    left: 8px;
+    width: auto;
+  }
+  .job-card-actions {
+    flex-direction: column;
+  }
+  .job-card-actions .btn {
+    width: 100%;
+  }
+  .job-employer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+}
